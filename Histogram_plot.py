@@ -5,7 +5,7 @@ import numpy as np
 from scipy.stats import gaussian_kde as gkde
 import pandas as pd
 from bokeh.plotting import figure, gridplot
-from bokeh.models import ColumnDataSource
+from bokeh.models import ColumnDataSource, Range1d
 from bokeh.models.tools import BoxSelectTool
 
 
@@ -15,11 +15,10 @@ def datetime(x): #function to change data tipe of dates to dates
 Stock_data = pd.read_csv("APLE.csv")
     
 source = ColumnDataSource(data=dict(x=datetime(Stock_data['Date']),y=Stock_data['Adj Close']))
-
+source2 = ColumnDataSource(data=dict(x=datetime(Stock_data['Date']),y=Stock_data['Close']))
 #Create scatter plot of data
 #set up figure
-time_plot = figure(plot_height= 400, plot_width= 800, title="Scatter plot",
-            x_axis_label ='Time', 
+time_plot = figure(plot_height= 400, plot_width= 800, title="", x_axis_label ='Time', 
             y_range = (min(source.data["y"]-5),max(source.data["y"]+5)),
             y_axis_label = 'Data', toolbar_location="left",  x_axis_type="datetime")
             
@@ -31,13 +30,19 @@ time_plot.ygrid.grid_line_alpha = 0.2
 #dimensions = specify the dimension in which the box selection is free in
 #select_every_mousemove = select points as box moves over
 time_plot.add_tools(BoxSelectTool(dimensions=["width"],select_every_mousemove=True))
-    
+
+#add anther axis
+time_plot.extra_y_ranges = {"foo": Range1d(start = min(source2.data["y"] - 5),
+                                          end = max(source2.data["y"] + 5))}
+
 #add data to scatter plot (data points on time plot)
-time_scat = time_plot.scatter("x","y", source=source,size=2)
-    
+time_scat = time_plot.scatter("x","y", source=source,size=1,color="navy")
+time_scat2 = time_plot.scatter("x","y", source=source2,size=1,color="red",y_range_name="foo")
+  
 #add time series line
 time_line = time_plot.line("x","y",source=source,color="navy",alpha=0.5)
-    
+time_line2 = time_plot.line("x","y",source=source2,color="red",alpha=0.5,y_range_name="foo")   
+
 #Create reggression line (slectable tool)   
     
 #Create marginal histogram for y-axis data density
@@ -83,10 +88,18 @@ u_hist = hist_plot.quad(top=edges[1:], bottom=edges[:-1], left=0, right=np.zeros
         fill_color="navy", alpha = 0.5)
                    
 kde_data = np.zeros((len(kde)))
-kde_line = hist_plot.line(kde_data,y_span,line_color="red")    
+kde_line = hist_plot.line(kde_data,y_span,line_color="red")
+
+#create scatter plot from of data sets
+scat_plot = figure(plot_height= 400, plot_width= 800, title="", x_axis_label ='', 
+            y_axis_label = '')
+            
+x = source.data['y']
+y = source2.data['y']
+scat_plot = time_plot.scatter(x,y,size=2)
                    
 #create plot layout
-layout = gridplot([[time_plot,hist_plot]])
+layout = gridplot([[time_plot,hist_plot],[scat_plot,None]])
     
 #add updateing histogram construction
 def update(attr, old, new):    
