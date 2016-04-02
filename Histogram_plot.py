@@ -5,7 +5,7 @@ import numpy as np
 from scipy.stats import gaussian_kde as gkde
 import pandas as pd
 from bokeh.plotting import figure, gridplot
-from bokeh.models import ColumnDataSource, Range1d
+from bokeh.models import ColumnDataSource, Range1d, LinearAxis
 from bokeh.models.tools import BoxSelectTool
 
 
@@ -19,7 +19,7 @@ source2 = ColumnDataSource(data=dict(x=datetime(Stock_data['Date']),y=Stock_data
 #Create scatter plot of data
 #set up figure
 time_plot = figure(plot_height= 400, plot_width= 800, title="", x_axis_label ='Time', 
-            y_range = (min(source.data["y"]-5),max(source.data["y"]+5)),
+            y_range = (min(source.data["y"]-5),max(source.data["y"]+5)), tools='',
             y_axis_label = 'Data', toolbar_location="left",  x_axis_type="datetime")
             
 #Customize time_plot grid lines
@@ -43,7 +43,8 @@ time_scat2 = time_plot.scatter("x","y", source=source2,size=1,color="red",y_rang
 time_line = time_plot.line("x","y",source=source,color="navy",alpha=0.5)
 time_line2 = time_plot.line("x","y",source=source2,color="red",alpha=0.5,y_range_name="foo")   
 
-#Create reggression line (slectable tool)   
+#add second axis to time_plot
+time_plot.add_layout(LinearAxis(y_range_name = "foo"),"left")   
     
 #Create marginal histogram for y-axis data density
 #set up figure
@@ -96,10 +97,10 @@ scat_plot = figure(plot_height= 400, plot_width= 800, title="", x_axis_label =''
             
 x = source.data['y']
 y = source2.data['y']
-scat_plot = time_plot.scatter(x,y,size=2)
+scat_plot.scatter(x,y,size=2)
                    
 #create plot layout
-layout = gridplot([[time_plot,hist_plot],[scat_plot,None]])
+layout = gridplot([[time_plot, hist_plot], [scat_plot, None]])
     
 #add updateing histogram construction
 def update(attr, old, new):    
