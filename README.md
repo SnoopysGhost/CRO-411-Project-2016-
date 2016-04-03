@@ -1,5 +1,5 @@
-# CRO_411_Project_2016_without_flask
-Reactor design project
+# CSC_411_Project_2016_without_flask
+Data Visualization Project.
 
 This is a appliaction for data visualization.
 
